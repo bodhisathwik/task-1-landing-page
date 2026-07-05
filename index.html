@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX — Built for the Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&family=Barlow+Condensed:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --carbon:#0a0b0d;
+    --asphalt:#151719;
+    --asphalt-2:#1d2023;
+    --white:#f1f1ee;
+    --grey:#8a8f96;
+    --race-red:#e2101a;
+    --race-red-dim:#7a0a10;
+    --gold:#c9a227;
+    --teal:#00e0c0;
+    --nav-h:76px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--carbon);
+    color:var(--white);
+    font-family:'Barlow Condensed',sans-serif;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--race-red);color:#fff;}
+
+  h1,h2,h3,.display{
+    font-family:'Titillium Web',sans-serif;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  section{position:relative;}
+
+  /* ================= NAV ================= */
+  .navbar{
+    position:fixed;
+    top:0;left:0;right:0;
+    height:var(--nav-h);
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 5%;
+    background:transparent;
+    border-bottom:1px solid transparent;
+    transition:background .4s ease, border-color .4s ease, box-shadow .4s ease, height .3s ease;
+  }
+  .navbar.scrolled{
+    background:rgba(10,11,13,0.86);
+    backdrop-filter:blur(10px) saturate(140%);
+    border-bottom:1px solid rgba(226,16,26,0.35);
+    box-shadow:0 8px 30px rgba(0,0,0,0.45);
+    height:64px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:'Titillium Web',sans-serif;
+    font-weight:900;
+    font-size:1.3rem;
+    letter-spacing:0.06em;
+  }
+  .brand .dot{width:9px;height:9px;background:var(--race-red);border-radius:50%;box-shadow:0 0 10px var(--race-red);}
+
+  /* start-lights signature element */
+  .start-lights{
+    display:flex;
+    gap:6px;
+    margin-left:14px;
+  }
+  .start-lights span{
+    width:8px;height:8px;border-radius:50%;
+    background:#2a2c30;
+    box-shadow:inset 0 0 2px #000;
+    transition:background .25s ease, box-shadow .25s ease;
+  }
+  .start-lights span.lit{
+    background:var(--race-red);
+    box-shadow:0 0 8px 2px var(--race-red);
+  }
+  .start-lights.go span.lit{
+    background:var(--teal);
+    box-shadow:0 0 8px 2px var(--teal);
+  }
+
+  .nav-links{
+    display:flex;
+    gap:2.4rem;
+    list-style:none;
+  }
+  .nav-links li{position:relative;}
+  .nav-links a{
+    font-family:'Titillium Web',sans-serif;
+    font-weight:600;
+    font-size:0.85rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--white);
+    padding:6px 2px;
+    display:inline-block;
+    transition:color .25s ease, letter-spacing .25s ease;
+  }
+  .nav-links a::after{
+    content:"";
+    position:absolute;
+    left:0;bottom:0;
+    width:0%;
+    height:2px;
+    background:linear-gradient(90deg,var(--race-red),var(--teal));
+    transition:width .28s cubic-bezier(.2,.8,.2,1);
+  }
+  .nav-links a:hover{
+    color:var(--teal);
+    letter-spacing:0.16em;
+  }
+  .nav-links a:hover::after{width:100%;}
+
+  .nav-cta{
+    font-family:'Titillium Web',sans-serif;
+    font-weight:700;
+    font-size:0.8rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    background:var(--race-red);
+    color:#fff;
+    padding:10px 20px;
+    border-radius:2px;
+    clip-path:polygon(6% 0,100% 0,94% 100%,0% 100%);
+    transition:background .25s ease, transform .2s ease;
+  }
+  .nav-cta:hover{background:var(--teal);color:#08201c;transform:translateY(-1px);}
+
+  .nav-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001;}
+  .nav-toggle span{width:26px;height:2px;background:var(--white);}
+
+  /* ================= HERO ================= */
+  .hero{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    padding:0 5%;
+    position:relative;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(226,16,26,0.12), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 80%, rgba(0,224,192,0.08), transparent 60%),
+      var(--carbon);
+    overflow:hidden;
+  }
+  .speed-lines{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    opacity:0.5;
+    pointer-events:none;
+  }
+  .speed-lines span{
+    position:absolute;
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--race-red), transparent);
+    border-radius:2px;
+    animation:zoom linear infinite;
+  }
+  @keyframes zoom{
+    from{transform:translateX(-40vw) scaleX(0.6); opacity:0;}
+    10%{opacity:1;}
+    to{transform:translateX(140vw) scaleX(1.4); opacity:0;}
+  }
+
+  .hero-inner{position:relative;z-index:1;max-width:780px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--teal);
+    font-size:0.8rem;
+    letter-spacing:0.25em;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:1.4rem;
+  }
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--teal);}
+
+  .hero h1{
+    font-size:clamp(3rem,8vw,6.2rem);
+    line-height:0.94;
+    color:var(--white);
+  }
+  .hero h1 span{color:var(--race-red);}
+  .hero p{
+    margin-top:1.6rem;
+    max-width:520px;
+    font-size:1.15rem;
+    color:var(--grey);
+    line-height:1.5;
+  }
+  .hero-actions{margin-top:2.4rem;display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--race-red);
+    color:#fff;
+    font-family:'Titillium Web',sans-serif;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-size:0.9rem;
+    padding:16px 30px;
+    clip-path:polygon(6% 0,100% 0,94% 100%,0% 100%);
+    transition:transform .2s ease, background .2s ease;
+  }
+  .btn-primary:hover{background:var(--teal);color:#08201c;transform:translateY(-2px);}
+  .btn-ghost{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.85rem;
+    color:var(--white);
+    border-bottom:1px solid var(--grey);
+    padding-bottom:4px;
+    transition:border-color .2s ease,color .2s ease;
+  }
+  .btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+
+  .telemetry-strip{
+    margin-top:3.4rem;
+    display:flex;
+    gap:2.6rem;
+    flex-wrap:wrap;
+  }
+  .telemetry-strip div{border-left:2px solid var(--race-red);padding-left:14px;}
+  .telemetry-strip .num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:1.7rem;
+    font-weight:700;
+    color:var(--white);
+  }
+  .telemetry-strip .lbl{
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--grey);
+  }
+
+  /* ================= GRID SECTION ================= */
+  .section{padding:7rem 5%;}
+  .section-head{max-width:640px;margin-bottom:3.2rem;}
+  .section-head .eyebrow{margin-bottom:1rem;}
+  .section-head h2{font-size:clamp(2.2rem,4.4vw,3.2rem);color:var(--white);}
+  .section-head p{color:var(--grey);margin-top:1rem;font-size:1.05rem;max-width:520px;}
+
+  .grid-cars{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1.6rem;
+  }
+  .car-card{
+    background:var(--asphalt);
+    border:1px solid var(--asphalt-2);
+    padding:2rem 1.8rem;
+    position:relative;
+    overflow:hidden;
+    transition:transform .3s ease, border-color .3s ease;
+  }
+  .car-card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--race-red),var(--teal));
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .35s ease;
+  }
+  .car-card:hover{transform:translateY(-6px);border-color:rgba(226,16,26,0.4);}
+  .car-card:hover::before{transform:scaleX(1);}
+  .car-rank{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--race-red);
+    font-size:0.85rem;
+    letter-spacing:0.1em;
+  }
+  .car-card h3{font-size:1.5rem;margin-top:0.6rem;color:var(--white);}
+  .car-card .car-team{color:var(--grey);font-size:0.85rem;margin-top:0.2rem;letter-spacing:0.06em;text-transform:uppercase;}
+  .car-stats{margin-top:1.4rem;display:flex;flex-direction:column;gap:0.6rem;}
+  .car-stats .row{display:flex;justify-content:space-between;font-size:0.85rem;color:var(--grey);}
+  .car-stats .row b{color:var(--white);font-family:'JetBrains Mono',monospace;}
+  .bar{height:5px;background:var(--asphalt-2);border-radius:3px;overflow:hidden;margin-top:6px;}
+  .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--race-red),var(--gold));}
+
+  /* ================= TIMELINE / CIRCUIT ================= */
+  .circuit-list{display:flex;flex-direction:column;}
+  .circuit-row{
+    display:grid;
+    grid-template-columns:70px 1fr 160px 120px;
+    align-items:center;
+    gap:1.2rem;
+    padding:1.4rem 0;
+    border-bottom:1px solid var(--asphalt-2);
+    transition:background .2s ease;
+  }
+  .circuit-row:hover{background:rgba(226,16,26,0.05);}
+  .circuit-row .n{font-family:'JetBrains Mono',monospace;color:var(--race-red);font-weight:700;}
+  .circuit-row h4{font-size:1.2rem;color:var(--white);font-family:'Titillium Web',sans-serif;text-transform:uppercase;}
+  .circuit-row .country{color:var(--grey);font-size:0.85rem;}
+  .circuit-row .lap{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:0.9rem;text-align:right;}
+
+  /* ================= FOOTER ================= */
+  footer{
+    padding:3.4rem 5%;
+    border-top:1px solid var(--asphalt-2);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:1.4rem;
+    color:var(--grey);
+    font-size:0.85rem;
+  }
+  footer .brand{font-size:1rem;color:var(--white);}
+
+  /* ================= RESPONSIVE ================= */
+  @media (max-width:980px){
+    .grid-cars{grid-template-columns:1fr 1fr;}
+    .circuit-row{grid-template-columns:50px 1fr 100px;}
+    .circuit-row .country{display:none;}
+  }
+  @media (max-width:720px){
+    .nav-links, .start-lights, .nav-cta{display:none;}
+    .nav-toggle{display:flex;}
+    .navbar.open .nav-links{
+      display:flex;
+      position:absolute;
+      top:100%;left:0;right:0;
+      background:rgba(10,11,13,0.98);
+      flex-direction:column;
+      padding:1.6rem 8%;
+      gap:1.4rem;
+      border-bottom:1px solid rgba(226,16,26,0.35);
+    }
+    .navbar.open .nav-cta{
+      display:inline-block;
+      position:absolute;
+      top:calc(100% + 210px);
+      left:8%;
+    }
+    .grid-cars{grid-template-columns:1fr;}
+    .telemetry-strip{gap:1.4rem;}
+    .section{padding:5rem 6%;}
+    .circuit-row{grid-template-columns:40px 1fr 80px;font-size:0.9rem;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="brand">
+    <span class="dot"></span> APEX
+    <div class="start-lights" id="startLights">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#grid">The Grid</a></li>
+    <li><a href="#telemetry">Telemetry</a></li>
+    <li><a href="#circuit">Circuit</a></li>
+    <li><a href="#footer">Paddock</a></li>
+  </ul>
+  <a href="#grid" class="nav-cta">Get on Track</a>
+  <div class="nav-toggle" id="navToggle"><span></span><span></span><span></span></div>
+</nav>
+
+<section class="hero">
+  <div class="speed-lines" id="speedLines"></div>
+  <div class="hero-inner">
+    <div class="eyebrow">LIGHTS OUT — SEASON GRID LIVE</div>
+    <h1>ENGINEERED<br>FOR THE <span>APEX</span></h1>
+    <p>Three cars, one grid, zero margin for error. Explore the machines built to shave tenths off every corner — and the numbers that separate pole position from the pit lane.</p>
+    <div class="hero-actions">
+      <a href="#grid" class="btn-primary">View the Grid</a>
+      <a href="#telemetry" class="btn-ghost">See live telemetry →</a>
+    </div>
+    <div class="telemetry-strip">
+      <div><div class="num mono">378<span style="font-size:1rem;color:var(--grey);">km/h</span></div><div class="lbl">Top Speed</div></div>
+      <div><div class="num mono">2.3<span style="font-size:1rem;color:var(--grey);">s</span></div><div class="lbl">0–100 km/h</div></div>
+      <div><div class="num mono">2.41<span style="font-size:1rem;color:var(--grey);">s</span></div><div class="lbl">Pit Stop Record</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="grid">
+  <div class="section-head">
+    <div class="eyebrow">CAR NUMBER · TEAM · SPEC SHEET</div>
+    <h2>The Starting Grid</h2>
+    <p>Every car on the grid trades weight, drag, and downforce differently. Here's how three front-runners are set up to attack this circuit.</p>
+  </div>
+  <div class="grid-cars">
+
+    <div class="car-card">
+      <div class="car-rank">P1 · CAR 01</div>
+      <h3>APEX RB-24</h3>
+      <div class="car-team">Vortex Racing</div>
+      <div class="car-stats">
+        <div class="row">Top Speed <b>352 km/h</b></div>
+        <div class="bar"><span style="width:96%"></span></div>
+        <div class="row">Downforce <b>High</b></div>
+        <div class="bar"><span style="width:80%"></span></div>
+        <div class="row">0–100 km/h <b>2.4s</b></div>
+        <div class="bar"><span style="width:92%"></span></div>
+      </div>
+    </div>
+
+    <div class="car-card">
+      <div class="car-rank">P2 · CAR 44</div>
+      <h3>SILVER STORM SS-7</h3>
+      <div class="car-team">Meridian Motorsport</div>
+      <div class="car-stats">
+        <div class="row">Top Speed <b>359 km/h</b></div>
+        <div class="bar"><span style="width:99%"></span></div>
+        <div class="row">Downforce <b>Medium</b></div>
+        <div class="bar"><span style="width:60%"></span></div>
+        <div class="row">0–100 km/h <b>2.5s</b></div>
+        <div class="bar"><span style="width:88%"></span></div>
+      </div>
+    </div>
+
+    <div class="car-card">
+      <div class="car-rank">P3 · CAR 16</div>
+      <h3>SCUDERIA ROSSA F-9</h3>
+      <div class="car-team">Rossa Corsa</div>
+      <div class="car-stats">
+        <div class="row">Top Speed <b>348 km/h</b></div>
+        <div class="bar"><span style="width:91%"></span></div>
+        <div class="row">Downforce <b>Very High</b></div>
+        <div class="bar"><span style="width:94%"></span></div>
+        <div class="row">0–100 km/h <b>2.3s</b></div>
+        <div class="bar"><span style="width:97%"></span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section" id="telemetry" style="background:var(--asphalt);">
+  <div class="section-head">
+    <div class="eyebrow">LIVE DATA · LAP 42/58</div>
+    <h2>Telemetry Feed</h2>
+    <p>The numbers behind every overtake — pulled straight from the car's onboard sensors.</p>
+  </div>
+  <div class="telemetry-strip" style="flex-wrap:wrap;gap:2.8rem 3.4rem;">
+    <div><div class="num mono" style="color:var(--teal);">1:18.492</div><div class="lbl">Fastest Lap</div></div>
+    <div><div class="num mono">312<span style="font-size:1rem;color:var(--grey);">km/h</span></div><div class="lbl">Sector 2 Speed Trap</div></div>
+    <div><div class="num mono">-0.6<span style="font-size:1rem;color:var(--grey);">s</span></div><div class="lbl">Gap to Leader</div></div>
+    <div><div class="num mono">6</div><div class="lbl">Laps on Tyre</div></div>
+  </div>
+</section>
+
+<section class="section" id="circuit">
+  <div class="section-head">
+    <div class="eyebrow">CALENDAR · ROUND 06</div>
+    <h2>The Circuit</h2>
+    <p>Six corners in, six to go. Here's how the record laps stack up around the world.</p>
+  </div>
+  <div class="circuit-list">
+    <div class="circuit-row"><div class="n">01</div><h4>Monaco Street Circuit</h4><div class="country">Monte Carlo, MC</div><div class="lap">1:12.909</div></div>
+    <div class="circuit-row"><div class="n">02</div><h4>Silverstone Circuit</h4><div class="country">Northamptonshire, UK</div><div class="lap">1:27.097</div></div>
+    <div class="circuit-row"><div class="n">03</div><h4>Suzuka International</h4><div class="country">Mie, JP</div><div class="lap">1:30.983</div></div>
+    <div class="circuit-row"><div class="n">04</div><h4>Interlagos</h4><div class="country">São Paulo, BR</div><div class="lap">1:10.540</div></div>
+  </div>
+</section>
+
+<footer id="footer">
+  <div class="brand">APEX GRID</div>
+  <div>Built for speed. Rendered for every screen. © 2026</div>
+</footer>
+
+<script>
+  // Nav scroll state
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Mobile toggle
+  const navToggle = document.getElementById('navToggle');
+  navToggle.addEventListener('click', () => navbar.classList.toggle('open'));
+
+  // Start lights sequence tied to scroll depth (F1 lights-out on scroll)
+  const lights = document.querySelectorAll('#startLights span');
+  function updateLights(){
+    const progress = Math.min(window.scrollY / 500, 1); // 0 -> 1 over first 500px
+    const litCount = Math.round(progress * lights.length);
+    lights.forEach((l,i)=> l.classList.toggle('lit', i < litCount));
+    document.getElementById('startLights').classList.toggle('go', progress >= 1);
+  }
+  window.addEventListener('scroll', updateLights);
+  updateLights();
+
+  // Ambient speed lines in hero
+  const speedLines = document.getElementById('speedLines');
+  const LINE_COUNT = 10;
+  for(let i=0;i<LINE_COUNT;i++){
+    const line = document.createElement('span');
+    const top = Math.random()*100;
+    const width = 80 + Math.random()*160;
+    const duration = 2.2 + Math.random()*2.6;
+    const delay = Math.random()*4;
+    line.style.top = top + '%';
+    line.style.width = width + 'px';
+    line.style.left = '0';
+    line.style.animationDuration = duration + 's';
+    line.style.animationDelay = delay + 's';
+    speedLines.appendChild(line);
+  }
+
+  // Respect reduced motion
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.speed-lines span').forEach(s => s.style.animation = 'none');
+  }
+</script>
+
+</body>
+</html>
